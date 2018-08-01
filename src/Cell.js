@@ -2,28 +2,27 @@ import React, { Component } from "react";
 import "./App.css";
 
 class Cell extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      activePlayer: ""
-    };
-  }
-  toMakeMove = () => {
-    const activePlayer = this.state.activePlayer;
+  state = {
+    value: ""
+  };
+
+  handleCellClick = () => {
+    const { activePlayer, toChangeActivePlayer } = this.props;
     if (activePlayer === "x") {
       this.setState({
-        activePlayer: "o"
+        value: "o"
       });
-    } else if (activePlayer === "" || "o") {
+    } else {
       this.setState({
-        activePlayer: "x"
+        value: "x"
       });
     }
+    toChangeActivePlayer();
   };
   render() {
     return (
-      <div className="cell" onClick={this.toMakeMove}>
-        {this.state.activePlayer}
+      <div className="cell" onClick={this.handleCellClick}>
+        {this.state.value}
       </div>
     );
   }
