@@ -6,75 +6,79 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activePlayer: ""
+      grid: Array(9).fill(""),
+      activePlayer: "x",
+      gameEnded: false
     };
   }
-  toChangeActivePlayer = () => {
-    const activePlayer = this.state.activePlayer;
-    if (activePlayer === "x") {
+  toMakeMove = index => () => {
+    console.log(index);
+    const updatedGrid = [...this.state.grid];
+    const { activePlayer, gameEnded } = this.state;
+    if (!gameEnded) {
+      if (activePlayer === "o") {
+        updatedGrid[index] = "o";
+        this.setState(
+          {
+            activePlayer: "x",
+            grid: updatedGrid
+          },
+          () => this.toCheckWinner("o")
+        );
+      } else {
+        updatedGrid[index] = "x";
+        this.setState(
+          {
+            activePlayer: "o",
+            grid: updatedGrid
+          },
+          () => this.toCheckWinner("x")
+        );
+      }
+    }
+  };
+  toCheckWinner = lastActivePlayer => {
+    const { grid } = this.state;
+    if (
+      (grid[0] === lastActivePlayer &&
+        grid[1] === lastActivePlayer &&
+        grid[2] === lastActivePlayer) ||
+      (grid[3] === lastActivePlayer &&
+        grid[4] === lastActivePlayer &&
+        grid[5] === lastActivePlayer) ||
+      (grid[6] === lastActivePlayer &&
+        grid[7] === lastActivePlayer &&
+        grid[8] === lastActivePlayer) ||
+      (grid[0] === lastActivePlayer &&
+        grid[3] === lastActivePlayer &&
+        grid[6] === lastActivePlayer) ||
+      (grid[1] === lastActivePlayer &&
+        grid[4] === lastActivePlayer &&
+        grid[7] === lastActivePlayer) ||
+      (grid[2] === lastActivePlayer &&
+        grid[5] === lastActivePlayer &&
+        grid[8] === lastActivePlayer) ||
+      (grid[0] === lastActivePlayer &&
+        grid[4] === lastActivePlayer &&
+        grid[8] === lastActivePlayer) ||
+      (grid[2] === lastActivePlayer &&
+        grid[4] === lastActivePlayer &&
+        grid[6] === lastActivePlayer)
+    ) {
       this.setState({
-        activePlayer: "o"
+        gameEnded: true
       });
-    } else {
-      this.setState({
-        activePlayer: "x"
-      });
+      alert(lastActivePlayer + " player won!");
     }
   };
   render() {
     return (
       <div className="App">
-        <div>
-          <Cell
-            activePlayer={this.state.activePlayer}
-            toChangeActivePlayer={this.toChangeActivePlayer}
-            key="1"
-          />
-          <Cell
-            activePlayer={this.state.activePlayer}
-            toChangeActivePlayer={this.toChangeActivePlayer}
-            key="2"
-          />
-          <Cell
-            activePlayer={this.state.activePlayer}
-            toChangeActivePlayer={this.toChangeActivePlayer}
-            key="3"
-          />{" "}
-        </div>
-        <div>
-          <Cell
-            activePlayer={this.state.activePlayer}
-            toChangeActivePlayer={this.toChangeActivePlayer}
-            key="4"
-          />
-          <Cell
-            activePlayer={this.state.activePlayer}
-            toChangeActivePlayer={this.toChangeActivePlayer}
-            key="5"
-          />
-          <Cell
-            activePlayer={this.state.activePlayer}
-            toChangeActivePlayer={this.toChangeActivePlayer}
-            key="6"
-          />{" "}
-        </div>
-        <div>
-          <Cell
-            activePlayer={this.state.activePlayer}
-            toChangeActivePlayer={this.toChangeActivePlayer}
-            key="7"
-          />
-          <Cell
-            activePlayer={this.state.activePlayer}
-            toChangeActivePlayer={this.toChangeActivePlayer}
-            key="8"
-          />
-          <Cell
-            activePlayer={this.state.activePlayer}
-            toChangeActivePlayer={this.toChangeActivePlayer}
-            key="9"
-          />{" "}
-        </div>
+        {this.state.grid.map((cell, index) => {
+          return (
+            <Cell key={index} onClick={this.toMakeMove(index)} value={cell} />
+          );
+        })}
       </div>
     );
   }
