@@ -71,14 +71,27 @@ class App extends Component {
       alert(lastActivePlayer + " player won!");
     }
   };
+  toRestartGame = () => {
+    this.setState({
+      grid: Array(9).fill(""),
+      activePlayer: "x",
+      gameEnded: false
+    });
+  };
   render() {
     return (
       <div className="App">
-        {this.state.grid.map((cell, index) => {
-          return (
-            <Cell key={index} onClick={this.toMakeMove(index)} value={cell} />
-          );
-        })}
+        <h2>Tic Tac Toe game</h2>
+        <div className="grid">
+          {this.state.grid.map((cell, index) => {
+            return (
+              <Cell key={index} onClick={this.toMakeMove(index)} value={cell} />
+            );
+          })}
+          <div className="restart-button">
+            <button onClick={this.toRestartGame}> Restart </button>
+          </div>
+        </div>
       </div>
     );
   }
