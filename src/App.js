@@ -2,17 +2,47 @@ import React, { Component } from "react";
 import "./App.css";
 import Cell from "./Cell.js";
 
+const WIN_COMBINATIONS = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
+];
+
+function getWinCellClass(winCombination) {
+  const indexOfComb = WIN_COMBINATIONS.findIndex(
+    e => JSON.stringify(winCombination) === JSON.stringify(e)
+  );
+  if (indexOfComb >= 0 && indexOfComb <= 2) {
+    return "win-cell-horizontal";
+  }
+
+  if (indexOfComb >= 3 && indexOfComb <= 5) {
+    return "win-cell-vertical";
+  }
+  if (indexOfComb === 6) {
+    return "win-cell-diagonal-left";
+  }
+  return "win-cell-diagonal-right";
+}
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       grid: Array(9).fill(""),
       activePlayer: "x",
-      gameEnded: false
+      gameEnded: false,
+      header: "X player turn",
+      winCells: [],
+      totalMoves: 0
     };
   }
+
   toMakeMove = index => () => {
-    console.log(index);
     const updatedGrid = [...this.state.grid];
     const { activePlayer, gameEnded } = this.state;
     if (!gameEnded) {
@@ -21,7 +51,9 @@ class App extends Component {
         this.setState(
           {
             activePlayer: "x",
-            grid: updatedGrid
+            grid: updatedGrid,
+            header: "X player turn",
+            totalMoves: this.state.totalMoves + 1
           },
           () => this.toCheckWinner("o")
         );
@@ -30,62 +62,69 @@ class App extends Component {
         this.setState(
           {
             activePlayer: "o",
-            grid: updatedGrid
+            grid: updatedGrid,
+            header: "O player turn",
+            totalMoves: this.state.totalMoves + 1
           },
           () => this.toCheckWinner("x")
         );
       }
     }
   };
+
   toCheckWinner = lastActivePlayer => {
-    const { grid } = this.state;
-    if (
-      (grid[0] === lastActivePlayer &&
-        grid[1] === lastActivePlayer &&
-        grid[2] === lastActivePlayer) ||
-      (grid[3] === lastActivePlayer &&
-        grid[4] === lastActivePlayer &&
-        grid[5] === lastActivePlayer) ||
-      (grid[6] === lastActivePlayer &&
-        grid[7] === lastActivePlayer &&
-        grid[8] === lastActivePlayer) ||
-      (grid[0] === lastActivePlayer &&
-        grid[3] === lastActivePlayer &&
-        grid[6] === lastActivePlayer) ||
-      (grid[1] === lastActivePlayer &&
-        grid[4] === lastActivePlayer &&
-        grid[7] === lastActivePlayer) ||
-      (grid[2] === lastActivePlayer &&
-        grid[5] === lastActivePlayer &&
-        grid[8] === lastActivePlayer) ||
-      (grid[0] === lastActivePlayer &&
-        grid[4] === lastActivePlayer &&
-        grid[8] === lastActivePlayer) ||
-      (grid[2] === lastActivePlayer &&
-        grid[4] === lastActivePlayer &&
-        grid[6] === lastActivePlayer)
-    ) {
+    const { grid, totalMoves } = this.state;
+    if (totalMoves === 9) {
       this.setState({
-        gameEnded: true
+        gameEnded: true,
+        header: "Match is draw"
       });
-      alert(lastActivePlayer + " player won!");
     }
+    WIN_COMBINATIONS.forEach(e => {
+      if (
+        grid[e[0]] === lastActivePlayer &&
+        grid[e[1]] === lastActivePlayer &&
+        grid[e[2]] === lastActivePlayer
+      ) {
+        this.setState({
+          gameEnded: true,
+          header: "Match won by " + lastActivePlayer.toUpperCase(),
+          winCells: e
+        });
+      }
+    });
   };
   toRestartGame = () => {
     this.setState({
       grid: Array(9).fill(""),
       activePlayer: "x",
-      gameEnded: false
+      gameEnded: false,
+      winCells: [],
+      header: "X player turn",
+      totalMoves: 0
     });
   };
+
   render() {
+    const { activePlayer, winCells } = this.state;
+    console.log(winCells);
     return (
       <div className="App">
-        <h2>Tic Tac Toe game</h2>
+        <h2>{this.state.header}</h2>
         <div className="grid">
           {this.state.grid.map((cell, index) => {
+            const isWinCell =
+              typeof winCells.find(element => element === index) !==
+              "undefined";
+            const cellAddClassName = isWinCell ? getWinCellClass(winCells) : "";
             return (
-              <Cell key={index} onClick={this.toMakeMove(index)} value={cell} />
+              <Cell
+                key={index}
+                cellAddClassName={cellAddClassName}
+                id={activePlayer === "x" ? "activeX" : "activeO"}
+                onClick={this.toMakeMove(index)}
+                value={cell}
+              />
             );
           })}
           <div className="restart-button">
